@@ -52,6 +52,9 @@ To start: npm run dev (nodemon, port 3001)# sales-backend
 update db url
 then run => npx prisma migrate deploy
 then run => npm run start
+to check status => npx prisma migrate status
+
+npx prisma db push
 
 (chatgpt run => npx prisma migrate deploy)
 (then run => npm run start)

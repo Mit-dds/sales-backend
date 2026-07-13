@@ -80,6 +80,7 @@ model Project {
   utilityAmount   Float         @map("utility_amount")
   parkingCost     Float         @map("parking_cost")
   bookingToken    Float         @map("booking_token")
+  day7Payment     Float         @default(0) @map("day7_payment")
   primaryColor    String        @map("primary_color")
   secondaryColor  String        @map("secondary_color")
   dpSplitOptions  Int[]         @map("dp_split_options")
