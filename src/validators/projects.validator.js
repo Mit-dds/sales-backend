@@ -36,7 +36,7 @@ export const validateProjectInput = (body) => {
   const {
     name, location, type, status, completionDate,
     feeLabel, feePct, feeFixed, utilityAmount, parkingCost,
-    bookingToken, primaryColor, secondaryColor,
+    bookingToken, day7Payment, primaryColor, secondaryColor,
     dpSplitOptions, disclaimer,
   } = body;
 
