@@ -1,4 +1,6 @@
+import fs from 'fs';
 import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
 import ejs from 'ejs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -11,10 +13,30 @@ let browserUsed = false;
 
 async function getBrowser() {
   if (!browserInstance || (typeof browserInstance.isConnected === 'function' ? !browserInstance.isConnected() : !browserInstance.connected)) {
-    browserInstance = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
+    const useCloudChromium = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER);
+
+    if (useCloudChromium && process.platform === 'linux') {
+      const executablePath = await chromium.executablePath();
+
+      if (fs.existsSync(executablePath)) {
+        browserInstance = await puppeteer.launch({
+          headless: true,
+          args: chromium.args,
+          executablePath,
+        });
+      } else {
+        browserInstance = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        });
+      }
+    } else {
+      browserInstance = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      });
+    }
+
     browserUsed = false;
   }
   browserUsed = true;
