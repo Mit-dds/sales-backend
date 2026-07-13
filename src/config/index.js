@@ -31,8 +31,8 @@ const config = {
     otpTemplateId: process.env.EMAILJS_OTP_TEMPLATE_ID || 'template_i9ox8d8',
     notificationTemplateId: process.env.EMAILJS_NOTIFICATION_TEMPLATE_ID || 'template_0wnup9f',
 },
-  adminPanelUrl: process.env.ADMIN_PANEL_URL || 'http://localhost:5173/admin',
-  frontendLoginUrl: process.env.FRONTEND_LOGIN_URL || 'http://localhost:5173/login',
+  adminPanelUrl: process.env.ADMIN_PANEL_URL || 'https://sales-frontend-rose-omega.vercel.app/users',
+  frontendLoginUrl: process.env.FRONTEND_LOGIN_URL || 'https://sales-frontend-rose-omega.vercel.app/login',
   database: {
     url: process.env.DATABASE_URL,
   },
