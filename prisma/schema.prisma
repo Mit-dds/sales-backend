@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  REMOVED
+}
+
+enum ProjectType {
+  Apartments
+  Townhouses
+  Mixed
+}
+
+enum ProjectStatus {
+  OffPlan
+  Ready
+}
+
+enum PaymentPlanType {
+  normal
+  event
+  both
+}
+
+enum DurationType {
+  till_handover
+  fixed_months
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  phone        String?    @unique
+  profileEmail String?
+  role         String     @default("agent")
+  status       UserStatus @default(PENDING)
+  photo        String?
+  watermark    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  passwordResetOtps PasswordResetOtp[]
+  offers            Offer[]
+}
+
+model PasswordResetOtp {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  otp       String
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_otps")
+}
+
+model Project {
+  id              String        @id @default(cuid())
+  name            String
+  location        String
+  type            ProjectType
+  status          ProjectStatus
+  completionDate  String        @map("completion_date")
+  feeLabel        String        @map("fee_label")
+  feePct          Float         @map("fee_pct")
+  feeFixed        Float         @map("fee_fixed")
+  utilityAmount   Float         @map("utility_amount")
+  parkingCost     Float         @map("parking_cost")
+  bookingToken    Float         @map("booking_token")
+  primaryColor    String        @map("primary_color")
+  secondaryColor  String        @map("secondary_color")
+  dpSplitOptions  Int[]         @map("dp_split_options")
+  disclaimer        String?       @db.Text
+  whyBuy            String[]      @default([]) @map("why_buy")
+  heroImagePath     String?       @map("hero_image_path")
+  masterPlanPath    String?       @map("master_plan_path")
+  masterPlanName    String?       @map("master_plan_name")
+  masterPlanIsImage Boolean?      @map("master_plan_is_image")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  unitTypes UnitType[]
+  units     Unit[]
+
+  @@map("projects")
+}
+
+model UnitType {
+  id          String   @id @default(cuid())
+  projectId   String   @map("project_id")
+  label       String
+  virtualTour String?  @map("virtual_tour")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subtypes     SubType[]
+  paymentPlans PaymentPlan[]
+  units        Unit[]
+
+  @@map("unit_types")
+}
+
+model SubType {
+  id              String   @id @default(cuid())
+  unitTypeId      String   @map("unit_type_id")
+  label           String
+  floorPlanPath   String?  @map("floor_plan_path")
+  floorPlanName   String?  @map("floor_plan_name")
+  floorPlanIsImage Boolean? @map("floor_plan_is_image")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  unitType UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
+
+  @@map("subtypes")
+}
+
+model PaymentPlan {
+  id                  String          @id @default(cuid())
+  unitTypeId          String          @map("unit_type_id")
+  planType            PaymentPlanType @map("plan_type")
+  label               String
+  dp                  Float
+  installmentPct      Float           @map("installment_pct")
+  durationType        DurationType    @map("duration_type")
+  durationMonths      Int?            @map("duration_months")
+  discount            Float           @default(0)
+  eventName           String?         @map("event_name")
+  eventDiscount       Float?          @map("event_discount")
+  eventInstallmentPct  Float?         @map("event_installment_pct")
+  eventDurationType   DurationType?   @map("event_duration_type")
+  eventDurationMonths Int?            @map("event_duration_months")
+  sortOrder           Int?            @map("sort_order")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  unitType UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
+
+  @@map("payment_plans")
+}
+
+model Settings {
+  id         String   @id @default("settings_1")
+  teamName   String   @default("Reportage Properties")
+  usdRate    Float    @default(3.65)
+  eurRate    Float    @default(3.98)
+  gbpRate    Float    @default(4.62)
+  inrRate    Float    @default(0.044)
+  rubRate    Float    @default(0.041)
+  audRate    Float    @default(2.41)
+  cadRate    Float    @default(2.68)
+  sarRate    Float    @default(0.97)
+  pkrRate    Float    @default(0.013)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model FxRate {
+  id        String   @id @default(cuid())
+  base      String   @default("USD")
+  rates     Json
+  createdAt DateTime @default(now())
+
+  @@map("fx_rates")
+}
+
+model Offer {
+  id              String   @id @default(cuid())
+  projectId       String?
+  projectName     String
+  unitId          String?
+  unitNumber      String
+  unitType        String?
+  subType         String?
+  planId          String?
+  planLabel       String
+  offerMode       String   @default("normal")
+  isEvent         Boolean  @default(false)
+  clientName      String
+  clientPhone     String?
+  listPrice       Float
+  discount        Float    @default(0)
+  netPrice        Float
+  extraDiscount   Float    @default(0)
+  day7Payment     Float    @default(0)
+  currency        String?
+  exchangeRate    Float?
+  schedule        Json     @default("[]")
+  fees            Json     @default("{}")
+  type            String   @default("single")
+  action          String   @default("generated")
+  agentId         String?
+  agentName       String?
+  agentPhone      String?
+  agentEmail      String?
+  agentToggles    Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User? @relation(fields: [agentId], references: [id])
+
+  @@index([agentId])
+  @@index([projectId])
+  @@index([createdAt])
+  @@map("offers")
+}
+
+model Unit {
+  id           String   @id @default(cuid())
+  projectId    String   @map("project_id")
+  unitTypeId   String   @map("unit_type_id")
+  number       String
+  floor        String
+  areaInternal Float    @map("area_internal")
+  areaExternal Float    @map("area_external")
+  area         Float
+  price        Float
+  subtype      String?
+  isGhost      Boolean   @default(false) @map("is_ghost")
+  createdBy    String?   @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitType UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
+
+  @@map("units")
+}

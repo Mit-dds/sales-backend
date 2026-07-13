@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @page { margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', 'Segoe UI', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f5efe7; color: #1f2430; }
+  .mono { font-family: 'Courier New', 'DM Mono', monospace; }
+  .serif { font-family: 'Georgia', 'Cormorant Garamond', serif; }
+  .soft-card { border: 1px solid rgba(23,30,43,0.08); border-radius: 20px; background: #fff; box-shadow: 0 18px 42px rgba(24,29,41,0.08); }
+</style>
+</head>
+<body>
+<%
+  var project = typeof project !== 'undefined' ? project : {};
+  var unit = typeof unit !== 'undefined' ? unit : {};
+  var unitType = typeof unitType !== 'undefined' ? unitType : null;
+  var settings = typeof settings !== 'undefined' ? settings : {};
+  var clientName = typeof clientName !== 'undefined' ? clientName : 'Valued Client';
+  var agentName = typeof agentName !== 'undefined' ? agentName : '';
+  var offer = typeof offer !== 'undefined' ? offer : {};
+  var plans = typeof plans !== 'undefined' ? plans : [];
+  var pc = project.primaryColor || '#1A3C6B';
+  var hr = hexRgb(pc);
+  var isEvent = offer.isEvent || false;
+
+  var comparison = [];
+  (plans || []).forEach(function(p) {
+    var effDisc = (isEvent && p.eventDiscount ? p.eventDiscount : p.discount) + 0;
+    var netP = unit.price * (1 - effDisc / 100);
+    var feePct = project.feePct || 4;
+    var feeFixed = project.feeFixed || 2194;
+    var regF = Math.round((netP * feePct) / 100) + feeFixed;
+    var utilA = project.utilityAmount || 3800;
+    var parkingA = 0; // calcParking not available in PDF, simplified
+    var finalP = Math.round(netP) + regF + utilA + parkingA;
+    comparison.push({
+      label: p.label,
+      dp: p.dp + '%',
+      installment: p.installmentPct > 0 ? p.installmentPct + '%/mo' : 'None',
+      duration: p.durationType === 'fixed_months' ? p.durationMonths + 'mo' : 'Till HO',
+      discount: effDisc + '%',
+      netPrice: fmtAED(netP),
+      regFee: fmtAED(regF),
+      parking: parkingA > 0 ? fmtAED(parkingA) : '-',
+      total: fmtAED(finalP)
+    });
+  });
+%>
+
+<div style="background:linear-gradient(180deg,#fcfaf7 0%,#f7efe6 100%);padding:32px 40px;position:relative;min-height:100vh;">
+  <% if (watermark || (settings && settings.teamName)) { %>
+  <div style="position:absolute;top:40%;left:0;right:0;text-align:center;opacity:0.04;font-size:36px;font-weight:700;color:#1A2340;font-family:Georgia,'Cormorant Garamond',serif;letter-spacing:6px;transform:rotate(-30deg);pointer-events:none;z-index:0;">
+    <%= watermark || settings.teamName || '' %>
+  </div>
+  <% } %>
+
+  <div style="margin-bottom:32px;text-align:center;">
+    <div style="font-size:9px;color:#8892AA;letter-spacing:4px;font-family:'Courier New','DM Mono',monospace;margin-bottom:8px;">PLAN COMPARISON</div>
+    <div style="font-family:Georgia,'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#1A2340;"><%= project.name %></div>
+    <div style="font-size:12px;color:#4A5880;margin-top:4px;"><%= unit.number %> - <%= unitType ? unitType.label : '' %> | <%= fmtDate(offerDate || new Date()) %></div>
+  </div>
+
+  <div class="soft-card" style="padding:18px;border-radius:22px;">
+    <% if (comparison.length > 0) { %>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+      <% comparison.forEach(function(c) { %>
+      <div style="padding:12px;border:1px solid #eee;border-radius:14px;background:#faf8f4;">
+        <div style="font-size:10px;color:<%= pc %>;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;font-family:'Courier New','DM Mono',monospace;margin-bottom:8px;"><%= c.label %></div>
+        <div style="display:grid;gap:6px;">
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Down Payment</span><span style="color:#1A2340;font-weight:600;"><%= c.dp %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Installments</span><span style="color:#1A2340;font-weight:600;"><%= c.installment %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Duration</span><span style="color:#1A2340;font-weight:600;"><%= c.duration %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Discount</span><span style="color:#1A8A5A;font-weight:600;"><%= c.discount %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Net Price</span><span style="color:#1A2340;font-weight:700;"><%= c.netPrice %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Reg. Fee</span><span style="color:#1A2340;font-weight:600;"><%= c.regFee %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Parking</span><span style="color:#1A2340;font-weight:600;"><%= c.parking %></span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Total</span><span style="color:<%= pc %>;font-weight:700;"><%= c.total %></span></div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <div style="padding:12px;color:#8892AA;">No comparison data available.</div>
+    <% } %>
+  </div>
+
+  <div style="margin-top:32px;padding:16px 20px;background:linear-gradient(135deg,rgba(123,63,26,0.06),rgba(212,168,138,0.12));border-radius:12px;border:1px solid rgba(123,63,26,0.12);">
+    <div style="font-size:10px;color:#8892AA;font-style:italic;"><%= project.disclaimer %></div>
+  </div>
+
+  <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #D0DCF0;padding-top:16px;">
+    <div>
+      <div style="font-size:9px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;letter-spacing:1px;">PREPARED FOR</div>
+      <div style="font-size:14px;font-weight:600;color:#1A2340;"><%= clientName %></div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:12px;font-weight:600;color:#1A2340;"><%= agentName %></div>
+      <div style="font-size:10px;color:#8892AA;"><%= settings.teamName || 'Reportage Properties' %></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
