@@ -46,3 +46,12 @@ All responses follow the shape:
 To seed an admin: npm run prisma:seed
 
 To start: npm run dev (nodemon, port 3001)# sales-backend
+
+#neon
+
+update db url
+then run => npx prisma migrate deploy
+then run => npm run start
+
+(chatgpt run => npx prisma migrate deploy)
+(then run => npm run start)
