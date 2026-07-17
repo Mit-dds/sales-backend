@@ -72,6 +72,7 @@ export const validateProjectInput = (body) => {
     utilityAmount: utilityAmount || 0,
     parkingCost: parkingCost || 0,
     bookingToken: bookingToken || 20000,
+    day7Payment: day7Payment || 30000,
     primaryColor: primaryColor || '#1A3C6B',
     secondaryColor: secondaryColor || '#A8C5E8',
     dpSplitOptions: dpSplitOptions || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
@@ -111,6 +112,7 @@ export const validateProjectUpdateInput = (body) => {
   if (body.utilityAmount !== undefined) data.utilityAmount = body.utilityAmount;
   if (body.parkingCost !== undefined) data.parkingCost = body.parkingCost;
   if (body.bookingToken !== undefined) data.bookingToken = body.bookingToken;
+  if (body.day7Payment !== undefined) data.day7Payment = body.day7Payment;
   if (body.primaryColor !== undefined) data.primaryColor = body.primaryColor;
   if (body.secondaryColor !== undefined) data.secondaryColor = body.secondaryColor;
   if (body.dpSplitOptions !== undefined) {

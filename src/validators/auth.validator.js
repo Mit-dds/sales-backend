@@ -2,20 +2,34 @@ import { body } from 'express-validator';
 
 const sanitizePhone = (value) => {
   if (!value) return value;
-  return value.replace(/\D/g, '');
+  let digits = value.replace(/\D/g, '');
+  if (digits.startsWith('+')) return digits;
+  if (digits.startsWith('971') && digits.length > 9) return '+' + digits;
+  if (digits.startsWith('0') && digits.length > 8) return '+971' + digits.slice(1);
+  if (digits.length > 5) return '+971' + digits;
+  return digits;
+};
+
+const isUaePhone = (value) => {
+  if (!value) return true;
+  if (!/^\+971\d{7,12}$/.test(value)) {
+    throw new Error('Enter a valid UAE number (e.g., +971 50 123 4567)');
+  }
+  return true;
 };
 
 export const registerValidator = [
   body('name')
     .trim()
     .notEmpty().withMessage('Name is required')
-    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters'),
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters')
+    .matches(/^[a-zA-Z\s'-]+$/).withMessage('Name cannot contain numbers'),
 
   body('email')
     .trim()
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Invalid email format')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 
   body('password')
     .notEmpty().withMessage('Password is required')
@@ -25,13 +39,13 @@ export const registerValidator = [
     .optional({ values: 'falsy' })
     .trim()
     .customSanitizer(sanitizePhone)
-    .isLength({ min: 7, max: 15 }).withMessage('Phone must be 7-15 digits'),
+    .custom(isUaePhone),
 
   body('profileEmail')
     .optional({ values: 'falsy' })
     .trim()
     .isEmail().withMessage('Invalid profile email format')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 ];
 
 export const loginValidator = [
@@ -39,13 +53,13 @@ export const loginValidator = [
     .optional({ values: 'falsy' })
     .trim()
     .isEmail().withMessage('Invalid email format')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 
   body('phone')
     .optional({ values: 'falsy' })
     .trim()
     .customSanitizer(sanitizePhone)
-    .isLength({ min: 7, max: 15 }).withMessage('Invalid phone number'),
+    .custom(isUaePhone),
 
   body('password')
     .notEmpty().withMessage('Password is required'),
@@ -69,7 +83,7 @@ export const forgotPasswordValidator = [
     .trim()
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Invalid email format')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 ];
 
 export const verifyOtpValidator = [
@@ -77,7 +91,7 @@ export const verifyOtpValidator = [
     .trim()
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Invalid email format')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 
   body('otp')
     .notEmpty().withMessage('OTP is required')
@@ -99,5 +113,24 @@ export const profileUpdateValidator = [
   body('name')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters'),
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters')
+    .matches(/^[a-zA-Z\s'-]+$/).withMessage('Name cannot contain numbers'),
+
+  body('email')
+    .optional()
+    .trim()
+    .isEmail().withMessage('Invalid email format')
+    .normalizeEmail({ gmail_remove_dots: false }),
+
+  body('phone')
+    .optional({ values: 'falsy' })
+    .trim()
+    .customSanitizer(sanitizePhone)
+    .custom(isUaePhone),
+
+  body('profileEmail')
+    .optional({ values: 'falsy' })
+    .trim()
+    .isEmail().withMessage('Invalid profile email format')
+    .normalizeEmail({ gmail_remove_dots: false }),
 ];

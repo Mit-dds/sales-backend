@@ -1,5 +1,6 @@
 import prisma from '../config/db.js';
 import logger from '../utils/logger.js';
+import ApiError from '../utils/apiError.js';
 import fs from 'fs';
 
 // ---------- Helpers ----------

@@ -45,16 +45,11 @@ All responses follow the shape:
 
 To seed an admin: npm run prisma:seed
 
-To start: npm run dev (nodemon, port 3001)# sales-backend
+To start: npm run dev (nodemon, port 3001)
 
-#neon
+Add your Resend API key to backend/.env:
 
-update db url
-then run => npx prisma migrate deploy
-then run => npm run start
-to check status => npx prisma migrate status
+RESEND_API_KEY=re_your_api_key_here
+Once the client buys a domain, verify it in Resend and update:
 
-npx prisma db push
-
-(chatgpt run => npx prisma migrate deploy)
-(then run => npm run start)
+RESEND_FROM_EMAIL=noreply@reportage.com

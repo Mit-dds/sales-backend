@@ -6,8 +6,8 @@ import * as authService from '../services/auth.service.js';
 export const register = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const messages = errors.array().map((e) => e.msg);
-    throw new ApiError(400, messages.join('; '));
+    const msgs = errors.array().map((e) => e.msg);
+    throw new ApiError(400, msgs.join('; '), { errors: errors.array() });
   }
 
   const { name, email, password, phone, profileEmail } = req.body;
@@ -122,16 +122,19 @@ export const logout = asyncHandler(async (_req, res) => {
 export const updateProfile = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const messages = errors.array().map((e) => e.msg);
-    throw new ApiError(400, messages.join('; '));
+    const msgs = errors.array().map((e) => e.msg);
+    throw new ApiError(400, msgs.join('; '), { errors: errors.array() });
   }
 
-  const name = req.body.name;
+  const { name, email, phone, profileEmail } = req.body;
   const photoFile = req.files?.photo?.[0];
   const watermarkFile = req.files?.watermark?.[0];
 
   const updateData = {};
   if (name !== undefined) updateData.name = name;
+  if (email !== undefined) updateData.email = email;
+  if (phone !== undefined) updateData.phone = phone;
+  if (profileEmail !== undefined) updateData.profileEmail = profileEmail;
   
   if (photoFile) {
     updateData.photoUrl = `/uploads/users/${photoFile.filename}`;

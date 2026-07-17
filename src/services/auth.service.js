@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '../config/db.js';
 import config from '../config/index.js';
 import ApiError from '../utils/apiError.js';
-import { sendOtpEmail, sendAdminNotificationEmail, sendApprovalEmail } from '../utils/emailjs.service.js';
+import { sendOtpEmail, sendAdminNotificationEmail, sendApprovalEmail } from '../utils/resend.service.js';
 import generateOtp from '../utils/otpGenerator.js';
 import logger from '../utils/logger.js';
 
@@ -37,7 +37,12 @@ const generateResetToken = (userId) => {
 
 const sanitizePhone = (value) => {
   if (!value) return value;
-  return value.replace(/\D/g, '');
+  let digits = value.replace(/\D/g, '');
+  if (digits.startsWith('+')) return digits;
+  if (digits.startsWith('971') && digits.length > 9) return '+' + digits;
+  if (digits.startsWith('0') && digits.length > 8) return '+971' + digits.slice(1);
+  if (digits.length > 5) return '+971' + digits;
+  return digits;
 };
 
 const excludePassword = (user) => {
@@ -271,7 +276,7 @@ export const updateUserStatus = async (userId, newStatus) => {
 
   if (user.status === 'PENDING' && newStatus === 'ACTIVE') {
     sendApprovalEmail(updatedUser).catch((err) => {
-      logger.error('Failed to send approval email via EmailJS: ' + err.message);
+      logger.error('Failed to send approval email via Resend: ' + err.message);
     });
   }
 
@@ -286,16 +291,37 @@ export const getMe = async (userId) => {
   return excludePassword(user);
 };
 
-export const updateProfile = async (userId, { name, photoUrl, watermarkUrl }) => {
+export const updateProfile = async (userId, { name, photoUrl, watermarkUrl, email, phone, profileEmail }) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
     throw new ApiError(404, 'User not found');
+  }
+
+  if (email !== undefined) {
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail && existingEmail.id !== userId) {
+      throw new ApiError(409, 'Email already in use');
+    }
+  }
+
+  if (phone !== undefined) {
+    const sanitizedPhone = phone.replace(/\D/g, '');
+    if (sanitizedPhone) {
+      const existingPhone = await prisma.user.findFirst({ where: { phone: sanitizedPhone } });
+      if (existingPhone && existingPhone.id !== userId) {
+        throw new ApiError(409, 'Phone number already in use');
+      }
+    }
+    phone = sanitizedPhone;
   }
 
   const updateData = {};
   if (name !== undefined) updateData.name = name;
   if (photoUrl !== undefined) updateData.photo = photoUrl;
   if (watermarkUrl !== undefined) updateData.watermark = watermarkUrl;
+  if (email !== undefined) updateData.email = email;
+  if (phone !== undefined) updateData.phone = phone || null;
+  if (profileEmail !== undefined) updateData.profileEmail = profileEmail || null;
 
   const updatedUser = await prisma.user.update({
     where: { id: userId },
