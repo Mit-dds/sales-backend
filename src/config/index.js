@@ -27,7 +27,7 @@ const config = {
   resend: {
     apiKey: process.env.RESEND_API_KEY || '',
     fromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-  },
+},
   companyName: process.env.COMPANY_NAME || 'Reportage Property Sales',
   companySupportEmail: process.env.COMPANY_SUPPORT_EMAIL || 'support@reportage.com',
   adminPanelUrl: process.env.ADMIN_PANEL_URL || 'http://localhost:5173/admin',

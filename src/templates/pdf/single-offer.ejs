@@ -305,7 +305,7 @@
           <% if (extraRate) { %>
           <div style="padding:12px 14px;background:rgba(<%= hr %>,0.06);border-radius:12px;border:1px solid rgba(<%= hr %>,0.12);">
             <div style="font-size:9px;color:#8892AA;letter-spacing:1.5px;font-family:'Courier New','DM Mono',monospace;margin-bottom:4px;"><%= extraCurrency %></div>
-            <div style="font-size:14px;font-weight:700;color:<%= pc %>;font-family:'Courier New','DM Mono',monospace;"><%= (Math.round(priceWithPark * extraRate)).toLocaleString('en-US') %></div>
+            <div style="font-size:14px;font-weight:700;color:#1A2340;font-family:'Courier New','DM Mono',monospace;"><%= (Math.round(priceWithPark * extraRate)).toLocaleString('en-US') %></div>
             <div style="font-size:9px;color:#8892AA;margin-top:2px;">1 AED = <%= extraCurrency %> <%= extraRate.toFixed(3) %></div>
           </div>
           <% } %>
@@ -352,8 +352,8 @@
             <div style="font-size:10px;font-weight:700;color:<%= dotColor %>;font-family:'Courier New','DM Mono',monospace;text-align:center;"><%= m.pct.toFixed(2) %>%</div>
             <div style="text-align:right;">
               <div style="font-size:<%= m.isHandover ? 12 : 11 %>px;font-weight:<%= m.isHandover ? 700 : 600 %>;color:<%= m.isHandover ? pc : '#1A2340' %>;font-family:'Courier New','DM Mono',monospace;"><%= fmtAED(m.amount) %></div>
-              <div style="font-size:8px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;margin-top:1px;"><%= fmtUSD(m.amount, usdRate) %></div>
-              <% if (extraRate) { %><div style="font-size:8px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;">(<%= Math.round(m.amount * extraRate).toLocaleString('en-US') %>)</div><% } %>
+              <div style="font-size:9px;color:#6A7890;font-family:'Courier New','DM Mono',monospace;margin-top:1px;"><%= fmtUSD(m.amount, usdRate) %></div>
+              <% if (extraRate) { %><div style="font-size:9px;color:#6A7890;font-family:'Courier New','DM Mono',monospace;">(<%= extraCurrency %> <%= Math.round(m.amount * extraRate).toLocaleString('en-US') %>)</div><% } %>
             </div>
           </div>
         </div>
@@ -412,8 +412,8 @@
             <div style="font-size:10px;font-weight:700;color:<%= dotColor %>;font-family:'Courier New','DM Mono',monospace;text-align:center;"><%= m.pct.toFixed(2) %>%</div>
             <div style="text-align:right;">
               <div style="font-size:<%= m.isHandover ? 12 : 11 %>px;font-weight:<%= m.isHandover ? 700 : 600 %>;color:<%= m.isHandover ? pc : '#1A2340' %>;font-family:'Courier New','DM Mono',monospace;"><%= fmtAED(m.amount) %></div>
-              <div style="font-size:8px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;margin-top:1px;"><%= fmtUSD(m.amount, usdRate) %></div>
-              <% if (extraRate) { %><div style="font-size:8px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;">(<%= Math.round(m.amount * extraRate).toLocaleString('en-US') %>)</div><% } %>
+              <div style="font-size:9px;color:#6A7890;font-family:'Courier New','DM Mono',monospace;margin-top:1px;"><%= fmtUSD(m.amount, usdRate) %></div>
+              <% if (extraRate) { %><div style="font-size:9px;color:#6A7890;font-family:'Courier New','DM Mono',monospace;">(<%= extraCurrency %> <%= Math.round(m.amount * extraRate).toLocaleString('en-US') %>)</div><% } %>
             </div>
           </div>
         </div>

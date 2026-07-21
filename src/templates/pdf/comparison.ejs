@@ -22,6 +22,7 @@
   var offer = typeof offer !== 'undefined' ? offer : {};
   var plans = typeof plans !== 'undefined' ? plans : [];
   var pc = project.primaryColor || '#1A3C6B';
+  var sc = project.secondaryColor || '#A8C5E8';
   var hr = hexRgb(pc);
   var isEvent = offer.isEvent || false;
 
@@ -62,25 +63,43 @@
     <div style="font-size:12px;color:#4A5880;margin-top:4px;"><%= unit.number %> - <%= unitType ? unitType.label : '' %> | <%= fmtDate(offerDate || new Date()) %></div>
   </div>
 
-  <div class="soft-card" style="padding:18px;border-radius:22px;">
+  <div class="soft-card" style="padding:0;border-radius:22px;overflow:hidden;">
     <% if (comparison.length > 0) { %>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
-      <% comparison.forEach(function(c) { %>
-      <div style="padding:12px;border:1px solid #eee;border-radius:14px;background:#faf8f4;">
-        <div style="font-size:10px;color:<%= pc %>;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;font-family:'Courier New','DM Mono',monospace;margin-bottom:8px;"><%= c.label %></div>
-        <div style="display:grid;gap:6px;">
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Down Payment</span><span style="color:#1A2340;font-weight:600;"><%= c.dp %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Installments</span><span style="color:#1A2340;font-weight:600;"><%= c.installment %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Duration</span><span style="color:#1A2340;font-weight:600;"><%= c.duration %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Discount</span><span style="color:#1A8A5A;font-weight:600;"><%= c.discount %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Net Price</span><span style="color:#1A2340;font-weight:700;"><%= c.netPrice %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Reg. Fee</span><span style="color:#1A2340;font-weight:600;"><%= c.regFee %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Parking</span><span style="color:#1A2340;font-weight:600;"><%= c.parking %></span></div>
-          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;"><span style="color:#8892AA;">Total</span><span style="color:<%= pc %>;font-weight:700;"><%= c.total %></span></div>
-        </div>
-      </div>
-      <% }); %>
-    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:linear-gradient(135deg,<%= pc %>,<%= sc %>);">
+          <th style="padding:14px 16px;text-align:left;font-size:9px;color:rgba(255,255,255,0.7);letter-spacing:2px;font-family:'Courier New','DM Mono',monospace;text-transform:uppercase;border-right:1px solid rgba(255,255,255,0.1);">Metric</th>
+          <% comparison.forEach(function(c) { %>
+          <th style="padding:14px 16px;text-align:center;font-size:10px;color:#fff;font-weight:700;letter-spacing:1.2px;font-family:'Courier New','DM Mono',monospace;text-transform:uppercase;border-right:<%= c === comparison[comparison.length - 1] ? 'none' : '1px solid rgba(255,255,255,0.1)' %>;"><%= c.label %></th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% var totalColor = pc;
+        var rows = [
+          { label: 'Down Payment', key: 'dp', color: '#1A2340', weight: 600 },
+          { label: 'Installments', key: 'installment', color: '#1A2340', weight: 600 },
+          { label: 'Duration', key: 'duration', color: '#1A2340', weight: 600 },
+          { label: 'Discount', key: 'discount', color: '#1A8A5A', weight: 700 },
+          { label: 'Net Price', key: 'netPrice', color: '#1A2340', weight: 700 },
+          { label: 'Reg. Fee', key: 'regFee', color: '#1A2340', weight: 600 },
+          { label: 'Parking', key: 'parking', color: '#1A2340', weight: 600 },
+          { label: 'Total', key: 'total', color: totalColor, weight: 700 }
+        ];
+        var showParking = project.type !== 'Townhouses';
+        %>
+        <% rows.forEach(function(r, ri) {
+          if (r.key === 'parking' && !showParking) return;
+        %>
+        <tr style="border-bottom:1px solid #eee;background:<%= ri % 2 === 0 ? '#faf8f4' : '#fff' %>;">
+          <td style="padding:12px 16px;font-size:11px;color:#8892AA;font-weight:500;border-right:1px solid #eee;"><%= r.label %></td>
+          <% comparison.forEach(function(c, ci) { %>
+          <td style="padding:12px 16px;text-align:center;font-size:12px;color:<%= r.color %>;font-weight:<%= r.weight %>;border-right:<%= ci === comparison.length - 1 ? 'none' : '1px solid #eee' %>;"><%= c[r.key] %></td>
+          <% }); %>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
     <% } else { %>
     <div style="padding:12px;color:#8892AA;">No comparison data available.</div>
     <% } %>

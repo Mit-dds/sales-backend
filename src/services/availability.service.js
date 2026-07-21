@@ -57,9 +57,15 @@ export const importFromExcel = async (file) => {
   }
 
   const findProject = (excelName, excelCity) => {
-    const nameLower = excelName.toLowerCase().trim();
-    if (!projectMap[nameLower]) return null;
-    return projectMap[nameLower];
+    const nameLower = excelName.trim().toLowerCase();
+    if (projectMap[nameLower]) return projectMap[nameLower];
+    const cityKey = excelCity ? `${nameLower}|${excelCity.trim().toLowerCase()}` : null;
+    if (cityKey && projectMap[cityKey]) return projectMap[cityKey];
+    for (const key of Object.keys(projectMap)) {
+      if (key.includes('|')) continue;
+      if (key.includes(nameLower) || nameLower.includes(key)) return projectMap[key];
+    }
+    return null;
   };
 
   logger.info(`[Availability] DB projects: ${JSON.stringify(allProjects.map((p) => ({ name: p.name, location: p.location, type: p.type })))}`);
@@ -69,7 +75,8 @@ export const importFromExcel = async (file) => {
   for (const row of rows) {
     const projectName = String(row[header[colIdx.projectName]] || '').trim();
     if (!projectName) continue;
-    const project = findProject(projectName);
+    const excelCity = colIdx.city !== -1 ? String(row[header[colIdx.city]] || '').trim() : '';
+    const project = findProject(projectName, excelCity);
     if (project) matchedProjectIds.add(project.id);
   }
 
@@ -100,7 +107,8 @@ export const importFromExcel = async (file) => {
 
   for (const row of rows) {
     const projectName = String(row[header[colIdx.projectName]] || '').trim();
-    const project = findProject(projectName);
+    const excelCity = colIdx.city !== -1 ? String(row[header[colIdx.city]] || '').trim() : '';
+    const project = findProject(projectName, excelCity);
 
     if (!project) {
       skippedCount++;
@@ -140,10 +148,11 @@ export const importFromExcel = async (file) => {
       ? String(row[header[colIdx.floor]] || '').trim()
       : '';
 
-    const internal = colIdx.internal !== -1 ? parseFloat(row[header[colIdx.internal]]) || 0 : 0;
-    const external = colIdx.external !== -1 ? parseFloat(row[header[colIdx.external]]) || 0 : 0;
-    const total = colIdx.total !== -1 ? parseFloat(row[header[colIdx.total]]) || 0 : 0;
-    const price = colIdx.price !== -1 ? parseFloat(row[header[colIdx.price]]) || 0 : 0;
+    const parseNum = (v) => { const n = parseFloat(String(v || '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+    const internal = colIdx.internal !== -1 ? parseNum(row[header[colIdx.internal]]) : 0;
+    const external = colIdx.external !== -1 ? parseNum(row[header[colIdx.external]]) : 0;
+    const total = colIdx.total !== -1 ? parseNum(row[header[colIdx.total]]) : 0;
+    const price = colIdx.price !== -1 ? parseNum(row[header[colIdx.price]]) : 0;
 
     if (!unitNumber) {
       skippedCount++;
@@ -196,7 +205,7 @@ export const importFromExcel = async (file) => {
 
   return {
     projects: grouped,
-    summary: { totalImported: importedCount, totalSkipped: skippedCount },
+    summary: { totalImported: importedCount, totalSkipped: skippedCount, skippedReasons },
   };
 };
 

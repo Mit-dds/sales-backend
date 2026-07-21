@@ -35,7 +35,7 @@
 
   <div style="padding:20px 48px;display:flex;justify-content:space-between;align-items:flex-start;">
     <div>
-      <div style="font-size:9px;color:#8892AA;letter-spacing:2px;font-family:'Courier New','DM Mono',monospace;margin-bottom:3px;">PLAN <%= idx + 1 %></div>
+      <div style="font-size:9px;color:#8892AA;letter-spacing:2px;font-family:'Courier New','DM Mono',monospace;margin-bottom:3px;">PLAN <%= idx + 1 %> <span style="color:#4A5880;letter-spacing:0.5px;text-transform:none;">for <%= clientName %></span></div>
       <div style="font-family:Georgia,'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#1A2340;"><%= off.plan.label %></div>
     </div>
     <div style="text-align:right;">
@@ -74,10 +74,12 @@
         <div style="font-size:9px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;">UTILITY</div>
         <div style="font-size:13px;font-weight:600;color:#1A2340;font-family:'Courier New','DM Mono',monospace;"><%= fmtAED(off.utility) %></div>
       </div>
+      <% if (project.type !== 'Townhouses') { %>
       <div style="padding:10px 14px;background:#F0F4FA;border-radius:6px;">
         <div style="font-size:9px;color:#8892AA;font-family:'Courier New','DM Mono',monospace;">PARKING</div>
         <div style="font-size:13px;font-weight:600;color:#1A2340;font-family:'Courier New','DM Mono',monospace;"><%= off.parking > 0 ? fmtAED(off.parking) : '-' %></div>
       </div>
+      <% } %>
     </div>
   </div>
 
